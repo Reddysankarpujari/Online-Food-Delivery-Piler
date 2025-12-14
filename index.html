@@ -1030,11 +1030,34 @@ document.getElementById('categories').addEventListener('click',e=>{
   renderHome();
 });
 
-  function renderHome(){
-    const allItems = restaurants.flatMap(r=>r.menu.map(m=>({...m,restaurantName:r.name,restaurantId:r.id})));
-    const filtered = currentFilter==='all'?allItems:allItems.filter(i=>i.category===currentFilter);
-    document.getElementById('food-grid').innerHTML = filtered.map(item=>`
-      <div class="food-card" onclick="addToCart('${item.id}','${item.restaurantId}','${item.restaurantName}',${item.price},'${item.name}',${item.veg},'${item.category}','${item.image}')">
+ function renderHome() {
+  const allItems = restaurants.flatMap(r =>
+    r.menu.map(m => ({
+      ...m,
+      restaurantName: r.name,
+      restaurantId: r.id
+    }))
+  );
+  const filtered =
+    currentFilter === 'all'
+      ? allItems
+      : allItems.filter(i => i.category === currentFilter);
+
+  const grid = document.getElementById('food-grid');
+  grid.innerHTML = filtered
+    .map(
+      item => `
+      <div
+        class="food-card"
+        data-id="${item.id}"
+        data-restaurant-id="${item.restaurantId}"
+        data-restaurant-name="${item.restaurantName}"
+        data-price="${item.price}"
+        data-name="${item.name.replace(/"/g, '&quot;')}"
+        data-veg="${item.veg}"
+        data-category="${item.category}"
+        data-image="${item.image}"
+      >
         <img class="food-image" src="${item.image}" alt="${item.name}">
         <div class="food-content">
           <div class="food-header">
@@ -1042,13 +1065,43 @@ document.getElementById('categories').addEventListener('click',e=>{
             <div class="food-price">₹${item.price}</div>
           </div>
           <div class="food-meta">
-            <span class="badge ${item.veg?'veg':'non-veg'}">${item.veg?'Veg':'Non-Veg'}</span>
+            <span class="badge ${item.veg ? 'veg' : 'non-veg'}">
+              ${item.veg ? 'Veg' : 'Non-Veg'}
+            </span>
             <span class="restaurant-tag">${item.restaurantName}</span>
           </div>
         </div>
       </div>
-    `).join('');
-  }
+    `
+    )
+    .join('');
+
+  // Attach click handler for all cards
+  grid.querySelectorAll('.food-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.id;
+      const restaurantId = card.dataset.restaurantId;
+      const restaurantName = card.dataset.restaurantName;
+      const price = parseInt(card.dataset.price, 10);
+      const name = card.dataset.name;
+      const veg = card.dataset.veg === 'true';
+      const category = card.dataset.category;
+      const image = card.dataset.image;
+
+      addToCart(
+        id,
+        restaurantId,
+        restaurantName,
+        price,
+        name,
+        veg,
+        category,
+        image,
+        true
+      );
+    });
+  });
+}
 
   /* UPDATED RESTAURANT CARDS */
  function renderRestaurants(){
